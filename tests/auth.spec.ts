@@ -1,4 +1,6 @@
 import { test, expect } from "@playwright/test";
+import { createHmac } from "node:crypto";
+import { SignJWT } from "jose";
 
 test("sign-in, persistence, and sign-out protect the greeting", async ({ page, context }) => {
   await page.goto("/");
@@ -35,10 +37,28 @@ test("sign-in, persistence, and sign-out protect the greeting", async ({ page, c
   await page.goto("/");
   await expect(page).toHaveURL(/\/sign-in$/);
 
-  // Even replaying the old cookie cannot restore a revoked session.
-  await context.addCookies([sessionCookie!]);
+  expect((await context.cookies()).some(cookie => cookie.name === sessionCookie!.name)).toBe(false);
+  // A forged cookie must not grant access.
+  await context.addCookies([{ ...sessionCookie!, value: "forged-session" }]);
   await page.goto("/");
   await expect(page).toHaveURL(/\/sign-in$/);
+});
+
+test("expired sessions and sessions signed with an old password are rejected", async ({ page, context }) => {
+  const makeKey = (password: string) => createHmac("sha256", process.env.ULTRA_TEST_SECRET!)
+    .update(JSON.stringify(["ultra-buddy-session-v1", "runner", password])).digest();
+  for (const [key, expiration] of [
+    [makeKey(process.env.ULTRA_TEST_PASSWORD!), Math.floor(Date.now() / 1000) - 60],
+    [makeKey("old-password"), Math.floor(Date.now() / 1000) + 3600],
+  ] as const) {
+    const token = await new SignJWT({}).setProtectedHeader({ alg: "HS256" })
+      .setSubject("runner").setIssuer("http://localhost:3100").setAudience("ultra-buddy")
+      .setIssuedAt(Math.floor(Date.now() / 1000) - 120).setExpirationTime(expiration).sign(key);
+    await context.addCookies([{ name: "ultra-buddy.session_token", value: token, url: "http://localhost:3100" }]);
+    await page.goto("/");
+    await expect(page).toHaveURL(/\/sign-in$/);
+    expect(await (await page.request.get("/api/auth/get-session")).json()).toBeNull();
+  }
 });
 
 test("signup and unused auth operations are unavailable", async ({ request, page }) => {

@@ -1,13 +1,12 @@
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
+import { getSession } from "@/lib/auth";
 import { SignInForm } from "@/components/sign-in-form";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 export default async function SignIn() {
-  const session = await auth.api.getSession({ headers: await headers() });
+  const session = await getSession();
   if (session) redirect("/");
 
   return (

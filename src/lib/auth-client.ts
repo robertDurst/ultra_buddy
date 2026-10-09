@@ -1,6 +1,16 @@
 "use client";
 
-import { createAuthClient } from "better-auth/react";
-import { usernameClient } from "better-auth/client/plugins";
+async function post(path: string, data: object = {}) {
+  const response = await fetch(`/api/auth/${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "same-origin",
+    body: JSON.stringify(data),
+  });
+  return { error: response.ok ? null : { status: response.status } };
+}
 
-export const authClient = createAuthClient({ plugins: [usernameClient()] });
+export const authClient = {
+  signIn: { username: (credentials: { username: string; password: string }) => post("sign-in/username", credentials) },
+  signOut: () => post("sign-out"),
+};

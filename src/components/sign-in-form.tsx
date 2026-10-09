@@ -18,7 +18,9 @@ export function SignInForm() {
         password: String(data.get("password")),
       });
       if (result.error) {
-        setError(result.error.status === 429
+        setError(result.error.status >= 500
+          ? "Sign-in is temporarily unavailable. Please try again later."
+          : result.error.status === 429
           ? "Too many attempts. Try again in a minute."
           : "Incorrect username or password.");
         setPending(false);
