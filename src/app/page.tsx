@@ -12,7 +12,7 @@ export default async function Home() {
   return (
     <section className="card welcome">
       <h1>Hello, {session.user.name}.</h1>
-      <p className="description">You’re signed in.</p>
+      <p className="description">You’re signed in!</p>
       <SignOutButton />
     </section>
   );
