@@ -1,1 +1,1 @@
-# ultra_buddy
+# Ultra Buddy
