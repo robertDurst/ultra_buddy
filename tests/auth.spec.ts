@@ -16,6 +16,7 @@ test("sign-in, persistence, and sign-out protect the greeting", async ({ page, c
   await page.getByLabel("Password").fill(process.env.ULTRA_TEST_PASSWORD!);
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Hello, Runner." })).toBeVisible();
+  await page.screenshot({ path: "test-results/greeting-desktop.png", animations: "disabled" });
   await page.reload();
   await expect(page.getByRole("heading", { name: "Hello, Runner." })).toBeVisible();
   await page.goto("/sign-in");
@@ -71,9 +72,11 @@ test("signup and unused auth operations are unavailable", async ({ request, page
   }
   const session = await request.get("/api/auth/get-session");
   expect(await session.json()).toBeNull();
+  await page.goto("/sign-in");
+  await page.screenshot({ path: "test-results/sign-in-desktop.png", animations: "disabled" });
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto("/sign-in");
   await expect(page.getByRole("button", { name: "Sign in", exact: true })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-  await page.screenshot({ path: "test-results/sign-in-mobile.png" });
+  await page.screenshot({ path: "test-results/sign-in-mobile.png", animations: "disabled" });
 });

@@ -11,7 +11,6 @@ export default async function Home() {
 
   return (
     <section className="card welcome">
-      <p className="eyebrow">ULTRA BUDDY</p>
       <h1>Hello, {session.user.name}.</h1>
       <p className="description">You’re signed in.</p>
       <SignOutButton />

@@ -11,9 +11,7 @@ export default async function SignIn() {
 
   return (
     <section className="card">
-      <p className="eyebrow">WELCOME BACK</p>
       <h1>Sign in.</h1>
-      <p className="description">Your next step starts here.</p>
       <SignInForm />
     </section>
   );
